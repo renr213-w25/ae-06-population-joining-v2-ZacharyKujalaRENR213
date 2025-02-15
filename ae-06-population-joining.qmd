@@ -96,7 +96,23 @@ population_continents |> filter(is.na(continent))
 ```{r}
 #| label: data-clean
 
+continents_renamed <- rename(continents, country = "entity") |>
+  select(-year)
 
+population_continents <- population |>
+  mutate(country = case_when(
+    country == "Congo, Dem. Rep." ~ "Democratic Republic of Congo",
+    country == "Congo, Rep." ~ "Congo",
+    country == "Hong Kong SAR, China" ~ "Hong Kong",
+    country == "Korea, Dem. People's Rep." ~ "North Korea",
+    country == "Korea, Rep." ~ "South Korea",
+    country == "Kyrgyz Republic" ~ "Kyrgyzstan",
+    .default = country)) |>
+  left_join(continents_renamed)
+
+population_continents
+
+population_continents |> filter(is.na(continent))
 ```
 
 -   **Think out loud:** Which continent do you think has the highest population? Which do you think has the second highest? The lowest?
