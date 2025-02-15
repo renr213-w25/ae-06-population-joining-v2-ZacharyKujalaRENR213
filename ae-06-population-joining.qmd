@@ -74,7 +74,13 @@ continents
 ```{r}
 #| label: join-population-continents
 
-# add code here
+continents_renamed <- rename(continents, country = "entity") |>
+  select(-year)
+
+population_continents <- population |>
+  left_join(continents_renamed)
+
+population_continents
 ```
 
 -   **Demo:** Take a look at the newly created `population_continent` data frame. There are some countries that were not in `continents`. First, identify which countries these are (they will have `NA` values for `continent`).
@@ -82,7 +88,7 @@ continents
 ```{r}
 #| label: data-inspect
 
-# add code here
+population_continents |> filter(is.na(continent))
 ```
 
 -   **Demo:** All of these countries are actually in the `continents` data frame, but under different names. So, let's clean that data first by updating the country names in the `population` data frame in a way they will match the `continents` data frame, and then joining them, using a `case_when()` statement in `mutate()`. At the end, check that all countries now have continent information.
@@ -90,7 +96,7 @@ continents
 ```{r}
 #| label: data-clean
 
-# add code here
+
 ```
 
 -   **Think out loud:** Which continent do you think has the highest population? Which do you think has the second highest? The lowest?
