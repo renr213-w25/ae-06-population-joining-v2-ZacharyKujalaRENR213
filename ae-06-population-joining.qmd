@@ -1,5 +1,6 @@
 ---
 title: "AE 06: Joining country populations with continents"
+author: "Zachary Kujala"
 ---
 
 ## Goal
@@ -62,11 +63,11 @@ continents
 
     -   Which variable(s) will we use to join the `population` and `continents` data frames?
 
-    Add response here.
+    Countries
 
     -   We want to create a new data frame that keeps all rows and columns from `population` and brings in the corresponding information from `continents`. Which join function should we use?
 
-    Add response here.
+    `left_join()`
 
 -   **Demo:** Join the two data frames and name assign the joined data frame to a new data frame `population_continents`.
 
@@ -94,7 +95,7 @@ continents
 
 -   **Think out loud:** Which continent do you think has the highest population? Which do you think has the second highest? The lowest?
 
-Add your response here.
+Highest: Asia. Second highest: Africa. Lowest: Oceania
 
 -   **Demo:** Create a new data frame called `population_summary` that contains a row for each continent and a column for the total population for that continent, in descending order of population. Note that the function for calculating totals in R is `sum()`.
 
