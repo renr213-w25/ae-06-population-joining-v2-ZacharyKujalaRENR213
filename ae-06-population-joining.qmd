@@ -1,5 +1,6 @@
 ---
 title: "AE 06: Joining country populations with continents"
+author: "Zachary Kujala"
 ---
 
 ## Goal
@@ -62,26 +63,38 @@ continents
 
     -   Which variable(s) will we use to join the `population` and `continents` data frames?
 
-    Add response here.
+    *Countries*
 
     -   We want to create a new data frame that keeps all rows and columns from `population` and brings in the corresponding information from `continents`. Which join function should we use?
 
-    Add response here.
+    `left_join()`
 
 -   **Demo:** Join the two data frames and name assign the joined data frame to a new data frame `population_continents`.
 
 ```{r}
 #| label: join-population-continents
 
-# add code here
+continents_renamed <- rename(continents, country = "entity") |>
+  select(-year)
+
+population_continents <- population |>
+  left_join(continents_renamed)
+
+population_continents
 ```
+
+::: callout-important
+`rename(continents, country = "entity")` sourced from:
+
+Hutton, C. P. (2021, May 19). A *Scientist's Guide to R: Step 2.2 - Joining Data with dplyr.* <https://craig.rbind.io/post/2020-03-29-asgr-2-2-joining-data/#left_join>
+:::
 
 -   **Demo:** Take a look at the newly created `population_continent` data frame. There are some countries that were not in `continents`. First, identify which countries these are (they will have `NA` values for `continent`).
 
 ```{r}
 #| label: data-inspect
 
-# add code here
+population_continents |> filter(is.na(continent))
 ```
 
 -   **Demo:** All of these countries are actually in the `continents` data frame, but under different names. So, let's clean that data first by updating the country names in the `population` data frame in a way they will match the `continents` data frame, and then joining them, using a `case_when()` statement in `mutate()`. At the end, check that all countries now have continent information.
@@ -89,19 +102,41 @@ continents
 ```{r}
 #| label: data-clean
 
-# add code here
+continents_renamed <- rename(continents, country = "entity") |>
+  select(-year)
+
+population_continents <- population |>
+  mutate(country = case_when(
+    country == "Congo, Dem. Rep." ~ "Democratic Republic of Congo",
+    country == "Congo, Rep." ~ "Congo",
+    country == "Hong Kong SAR, China" ~ "Hong Kong",
+    country == "Korea, Dem. People's Rep." ~ "North Korea",
+    country == "Korea, Rep." ~ "South Korea",
+    country == "Kyrgyz Republic" ~ "Kyrgyzstan",
+    .default = country)) |>
+  left_join(continents_renamed)
+
+population_continents
+
+population_continents |> filter(is.na(continent)) #check for missing continent info
 ```
 
 -   **Think out loud:** Which continent do you think has the highest population? Which do you think has the second highest? The lowest?
-
-Add your response here.
+    -   *Highest: Asia.*
+    -   *Second highest: Africa.*
+    -   *Lowest: Oceania*
 
 -   **Demo:** Create a new data frame called `population_summary` that contains a row for each continent and a column for the total population for that continent, in descending order of population. Note that the function for calculating totals in R is `sum()`.
 
 ```{r}
 #| label: population-continents-sum
 
-# add code here
+population_summary <- population_continents |>
+  group_by(continent) |>
+  summarize(total_population = sum(population)) |> 
+  arrange(desc(total_population))
+
+population_summary
 ```
 
 -   **Your turn:** Make a bar plot with total population on the y-axis and continent on the x-axis, where the height of each bar represents the total population in that continent.
@@ -109,8 +144,23 @@ Add your response here.
 ```{r}
 #| label: population-summary-bar
 
-# add code here
+ggplot(population_summary, 
+       aes(x = continent, y = total_population / 1000000)) +
+  geom_bar(stat = "identity") +
+  labs(
+    x = "Continent",
+    y = "Total population",
+    title = "World population",
+    subtitle = "As of 2022"
+  ) + scale_y_continuous(labels = label_number(suffix = " bil"))
+
 ```
+
+::: callout-important
+`scale_y_continuous(labels = label_number(suffix = " bil"))` sourced from:
+
+Label numbers in decimal format (e.g. 0.12, 1,234). (n.d). Scales. <https://scales.r-lib.org/reference/label_number.html>
+:::
 
 -   **Your turn:** Recreate the following plot, which is commonly referred to as a **lollipop plot**. Hint: Start with the points, then try adding the `segment`s, then add axis labels and `caption`, and finally, as a stretch goal, update the x scale (which will require a function we haven't introduced in lectures or labs yet!).
 
@@ -120,9 +170,30 @@ Add your response here.
 #| label: population-summary-lollipop
 #| fig-asp: 0.4
 
-# add code here
+ggplot(population_summary, 
+       aes(x = continent, y = total_population / 1000000)) +
+  geom_point() +
+  geom_segment(aes(x = continent, 
+                   xend = continent, 
+                   y = 0, 
+                   yend = total_population / 1000000)) +
+  labs(
+    x = "Continent",
+    y = "Total population",
+    title = "World population",
+    subtitle = "As of 2022",
+    caption = "Data sources: The World Bank and Our World in Data") +
+  scale_y_continuous(labels = label_number(suffix = " bil")) +
+  coord_flip() +
+  theme_minimal()
 ```
+
+::: callout-important
+`geom_segment(aes(x,xend,y,yend))`, `geom_point()` and `coord_flip()` sourced from:
+
+Custom lollipop chart. (n.d.) The The R Graph Gallery. <https://r-graph-gallery.com/301-custom-lollipop-chart.html#horiz>
+:::
 
 -   **Think out loud:** What additional improvements would you like to make to this plot.
 
-Add your response here.
+*The continents can be arranged in descending order based on total population.*
